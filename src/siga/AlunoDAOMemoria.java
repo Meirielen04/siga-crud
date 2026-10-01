@@ -31,6 +31,10 @@ public class AlunoDAOMemoria implements AlunoDAO {
     @Override
     public void inserir(Aluno aluno) {
         // TODO (etapa 1): impedir matrícula duplicada, lançando IllegalStateException.
+        Aluno matriculado = buscarPorMatricula(aluno.getMatricula());
+        if (matriculado != null) {
+            throw new IllegalStateException("Aluno já matriculado");
+        }
         armazem.add(aluno);
     }
 
@@ -54,7 +58,14 @@ public class AlunoDAOMemoria implements AlunoDAO {
     public void atualizar(Aluno aluno) {
         // TODO (etapa 1): localizar o aluno pela matrícula e substituí-lo,
         // lançando exceção caso não exista.
-        throw new UnsupportedOperationException("Operação ainda não implementada.");
+        for (int i = 0; i < armazem.size(); i++) {
+            if (armazem.get(i).getMatricula().equals(aluno.getMatricula())) {
+                armazem.set(i, aluno);
+                return;
+            }
+        }
+        throw new IllegalStateException("Matricula não encontrada");
+        // throw new UnsupportedOperationException("Operação ainda não implementada.");
     }
 
     @Override
