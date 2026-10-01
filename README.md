@@ -1,8 +1,10 @@
-# SIGA — Atividade de CRUD completo e Etapa 1 (código inicial)
+# SIGA — CRUD de Alunos (Etapa 1)
 
 **Técnicas de Programação II (TP2) · Aula 8** — CST em Desenvolvimento de Software Multiplataforma · Fatec de Porto Ferreira
 
-Este é o **código inicial** da atividade prática da Aula 8. O CRUD está **incompleto** e o código contém **três deslizes propositais**, que você deverá corrigir. Ao final, este projeto compõe a entrega da **Etapa 1 do Projeto Integrador**.
+Autoria: Meirielen
+
+Sistema de Gestão Acadêmica Simplificado (SIGA). Este projeto implementa o CRUD completo de alunos (cadastrar, consultar, alterar, excluir e listar), organizado em camadas, e compõe a entrega da **Etapa 1 do Projeto Integrador**.
 
 ## Estrutura do projeto
 
@@ -10,12 +12,20 @@ Este é o **código inicial** da atividade prática da Aula 8. O CRUD está **in
 siga-crud/
 └── src/
     └── siga/
-        ├── Aluno.java             (entidade de domínio; pronta)
-        ├── AlunoDAO.java          (interface do DAO, da Aula 7; pronta)
-        ├── AlunoDAOMemoria.java   (CRUD incompleto + deslizes 1 e 2)
-        ├── ServicoAluno.java      (camada de serviço incompleta + deslize 3)
-        └── Main.java              (apresentação; demonstra os deslizes)
+        ├── Aluno.java             (entidade de domínio)
+        ├── AlunoDAO.java          (interface de acesso a dados)
+        ├── AlunoDAOMemoria.java   (DAO que guarda os alunos em memória)
+        ├── ServicoAluno.java      (regras de negócio e validação)
+        └── Main.java              (apresentação: demonstra o CRUD e trata as exceções)
 ```
+
+| Arquivo | Responsabilidade |
+|---|---|
+| `Aluno` | Representa um aluno (nome, matrícula e média). É imutável. |
+| `AlunoDAO` | Contrato das operações de persistência, sem detalhes de armazenamento. |
+| `AlunoDAOMemoria` | Implementação do contrato usando uma lista em memória. |
+| `ServicoAluno` | Valida os dados e garante as regras do domínio antes de chamar o DAO. |
+| `Main` | Camada de apresentação: chama o serviço e traduz as exceções em mensagens. |
 
 ## Como compilar e executar
 
@@ -29,40 +39,38 @@ javac -d bin src/siga/*.java
 java -cp bin siga.Main
 ```
 
-Execute e observe a saída: ela **demonstra os três deslizes acontecendo**.
+## O que foi implementado
 
-## O que está incompleto
+- **DAO (`AlunoDAOMemoria`)**
+  - `inserir` impede matrícula duplicada, lançando `IllegalStateException`.
+  - `atualizar` localiza o aluno pela matrícula e o substitui; lança `IllegalStateException` se não existir.
+- **Serviço (`ServicoAluno`)**
+  - `validar(Aluno)`: método privado com as regras de nome e de média, reutilizado por `cadastrar` e `alterar`.
+  - `consultar`, `alterar` e `excluir`, que verificam se o aluno existe antes de agir.
+- **Apresentação (`Main`)**
+  - Métodos `cadastrar`, `consultar`, `alterar` e `excluir` com `try/catch`, mensagens específicas e nenhum `catch` vazio.
 
-| Local | Situação |
-|---|---|
-| `AlunoDAOMemoria.inserir` | Não impede matrícula duplicada |
-| `AlunoDAOMemoria.atualizar` | Não implementado (lança `UnsupportedOperationException`) |
-| `ServicoAluno` | Faltam `consultar`, `alterar` e `excluir` |
+## Deslizes corrigidos
 
-## Os três deslizes propositais
+| # | Deslize | Como foi corrigido |
+|---|---|---|
+| 1 | Coleção interna exposta em `listarTodos` | O método passou a devolver uma cópia da lista (cópia defensiva). Alterar a lista recebida não afeta o DAO. |
+| 2 | Exclusão silenciosa em `remover` | O método verifica se o aluno existe e lança `IllegalStateException` quando a matrícula não é encontrada. |
+| 3 | Validação da média duplicada no `Main` | A validação foi removida da apresentação. A regra existe apenas em `ServicoAluno.validar`. |
 
-| # | Deslize | Onde | Por que é um problema |
-|---|---|---|---|
-| 1 | **Coleção interna exposta** | `AlunoDAOMemoria.listarTodos` | Devolve a própria lista interna; a tela consegue inserir um aluno sem passar pelo serviço, quebrando o encapsulamento. |
-| 2 | **Exclusão silenciosa** | `AlunoDAOMemoria.remover` | Não verifica se o registro existia; o usuário recebe confirmação de uma operação que não ocorreu. |
-| 3 | **Validação duplicada e divergente** | `ServicoAluno` e `Main` | A regra da média está nos dois lugares, com limites diferentes (0..10 e 0..100). Regra duplicada diverge com o tempo. |
+## Decisões de design
 
-## Sua tarefa
-
-Siga as etapas da ficha de atividade prática:
-
-1. **Completar o CRUD** no `AlunoDAOMemoria`: impedir matrícula duplicada em `inserir` e implementar `atualizar`, verificando a existência do registro.
-2. **Implementar a camada de serviço**: `consultar`, `alterar` e `excluir` no `ServicoAluno`, extraindo a validação para um método privado `validar(Aluno)` reutilizado pelas operações.
-3. **Corrigir os três deslizes**: cópia defensiva em `listarTodos`, verificação de existência em `remover` e eliminação da validação duplicada na apresentação (a regra do domínio fica **apenas** no serviço).
-4. **Tratar as exceções** na camada de apresentação, com mensagens claras e específicas — e sem blocos `catch` vazios.
-5. **Consolidar a Etapa 1** no repositório, com README e commits descritivos.
+- **A regra da média fica só no serviço.** Quando a mesma regra mora em dois lugares, os limites divergem com o tempo. A apresentação apenas chama o serviço e mostra o resultado, sem conhecer o limite.
+- **O DAO falha com exceção, e não em silêncio.** Remover ou atualizar um registro que não existe é um erro, e o usuário precisa ser avisado em vez de receber uma confirmação falsa.
+- **`excluir` e `alterar` reutilizam `consultar`.** A verificação de existência fica em um único método do serviço.
+- **O serviço recebe o DAO pelo construtor** (injeção de dependência), dependendo da interface `AlunoDAO` e não da implementação em memória. Assim o armazenamento pode ser trocado sem alterar o serviço.
 
 ## Critério de sucesso
 
-Ao final: (a) as **quatro operações** do CRUD funcionam; (b) a regra da média existe em **um único lugar**; (c) a tela **não consegue** alterar a coleção interna do DAO; e (d) excluir uma matrícula inexistente produz **mensagem de erro**, não de sucesso.
+(a) As quatro operações do CRUD funcionam; (b) a regra da média existe em um único lugar; (c) a tela não consegue alterar a coleção interna do DAO; e (d) excluir uma matrícula inexistente produz mensagem de erro, não de sucesso.
 
 ## Padrão de entrega
 
-Conforme a ficha de atividade prática: identificadores em português, um arquivo `.java` por classe pública, código formatado, entrega no repositório Git com README e commits descritivos. O uso de IA para gerar o código é proibido nesta atividade (ver seção 5.3 da ficha).
+Identificadores em português, um arquivo `.java` por classe pública, código formatado, entrega no repositório Git com README e commits descritivos (um por etapa).
 
 > **Etapa 1 do Projeto Integrador:** além desta atividade, a entrega inclui o modelo de domínio, o diagrama de classes, ao menos um padrão criacional justificado e a documentação das decisões de design. Consulte a Seção 10 da apostila da Aula 8.
