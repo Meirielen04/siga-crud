@@ -49,27 +49,28 @@ public class Main {
 
         // DESLIZE 3 em ação: esta camada valida com limite diferente do serviço.
         Aluno suspeito = new Aluno("Média Absurda", "2026003", 50);
-        if (suspeito.getMedia() >= 0 && suspeito.getMedia() <= 100) {   // limite divergente!
-            System.out.println("\nA tela aprovou média 50 (limite 0..100),");
-            try {
-                servico.cadastrar(suspeito);
-            } catch (IllegalArgumentException e) {
-                System.out.println("  mas o serviço recusou: " + e.getMessage());
-                System.out.println("  (a mesma regra mora em dois lugares, com limites diferentes)");
-            }
-        }
+        cadastrar(servico, suspeito);
+        // if (suspeito.getMedia() >= 0 && suspeito.getMedia() <= 100) {   // limite divergente!
+        //     System.out.println("\nA tela aprovou média 50 (limite 0..100),");
+            // try {
+            //     servico.cadastrar(suspeito);
+            // } catch (IllegalArgumentException e) {
+            //     System.out.println("  mas o serviço recusou: " + e.getMessage());
+            //     System.out.println("  (a mesma regra mora em dois lugares, com limites diferentes)");
+            // }
+        // }
 
         // --- UPDATE (ainda não implementado) ---
         System.out.println();
-        try {
-            dao.atualizar(new Aluno("Maria Silva", "2026001", 9.0));
-        } catch (UnsupportedOperationException e) {
-            System.out.println("Atualizar: " + e.getMessage());
-        }
+        // try {
+        //     dao.atualizar(new Aluno("Maria Silva", "2026001", 9.0));
+        // } catch (UnsupportedOperationException e) {
+        //     System.out.println("Atualizar: " + e.getMessage());
+        // }
 
-        System.out.println("\nSua tarefa: completar o CRUD, implementar a camada de serviço");
-        System.out.println("e corrigir os três deslizes (coleção exposta, exclusão silenciosa");
-        System.out.println("e validação duplicada). Depois, consolide a Etapa 1 no repositório.");
+        // System.out.println("\nSua tarefa: completar o CRUD, implementar a camada de serviço");
+        // System.out.println("e corrigir os três deslizes (coleção exposta, exclusão silenciosa");
+        // System.out.println("e validação duplicada). Depois, consolide a Etapa 1 no repositório.");
     }
 
     /** Apresentação: traduz as exceções do serviço em mensagens ao usuário. */
