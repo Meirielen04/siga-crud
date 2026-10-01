@@ -29,12 +29,7 @@ public class ServicoAluno {
 
     public void cadastrar(Aluno aluno) {
         // Validação escrita diretamente aqui (e repetida no Main, com outro limite).
-        if (aluno.getNome() == null || aluno.getNome().isBlank()) {
-            throw new IllegalArgumentException("Nome é obrigatório.");
-        }
-        if (aluno.getMedia() < 0 || aluno.getMedia() > 10) {
-            throw new IllegalArgumentException("Média deve estar entre 0 e 10.");
-        }
+        validar(aluno);
         dao.inserir(aluno);
     }
 
@@ -42,12 +37,35 @@ public class ServicoAluno {
         return dao.listarTodos();
     }
 
+    private void validar(Aluno aluno) {
+        if (aluno.getNome() == null || aluno.getNome().isBlank()) {
+            throw new IllegalArgumentException("Nome é obrigatório.");
+        }
+        if (aluno.getMedia() < 0 || aluno.getMedia() > 10) {
+            throw new IllegalArgumentException("Média deve estar entre 0 e 10.");
+        }
+    }
     // TODO (etapa 2): implementar consultar(String matricula), lançando
     // exceção quando o aluno não for encontrado.
-
+    public Aluno consultar(String matricula) {
+        Aluno consultaDao = dao.buscarPorMatricula(matricula);
+        if (consultaDao == null) {
+            throw new IllegalArgumentException("Aluno não encontrado: " + matricula);
+        }
+        return consultaDao;
+    }
     // TODO (etapa 2): implementar alterar(Aluno aluno), validando e
     // garantindo que o aluno exista antes de atualizar.
+    public void alterar(Aluno aluno) {
+        validar(aluno);
+        consultar(aluno.getMatricula());
+        dao.atualizar(aluno);
+    }
 
     // TODO (etapa 2): implementar excluir(String matricula), garantindo
     // que o aluno exista antes de remover.
+    public void excluir(String matricula) {
+        consultar(matricula);
+        dao.remover(matricula);
+    }
 }
