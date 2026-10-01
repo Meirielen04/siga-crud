@@ -15,7 +15,7 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) {
-        System.out.println("=== SIGA - Atividade CRUD e Etapa 1 (código inicial) ===\n");
+        System.out.println("=== SIGA - Atividade CRUD ===\n");
 
         AlunoDAO dao = new AlunoDAOMemoria();
         ServicoAluno servico = new ServicoAluno(dao);
@@ -40,12 +40,14 @@ public class Main {
         for (Aluno aluno : servico.listar()) {
             System.out.println("  " + aluno);
         }
-        System.out.println("  (o 'Intruso' entrou sem passar pelo serviço)");
+        // System.out.println("  (o 'Intruso' entrou sem passar pelo serviço)");
+        System.out.println("  (o 'Intruso' não entrou, a lista é uma cópia)");
 
         // DESLIZE 2 em ação: exclusão de matrícula inexistente informa sucesso.
-        dao.remover("0000000");
-        System.out.println("\nExclusão de matrícula inexistente: 'removido com sucesso'");
-        System.out.println("  (mas nada foi removido — falha silenciosa)");
+        // dao.remover("0000000");
+        excluir(servico, "0000000");
+        // System.out.println("\nExclusão de matrícula inexistente agora informa erro);
+        // System.out.println("  (mas nada foi removido — falha silenciosa)");
 
         // DESLIZE 3 em ação: esta camada valida com limite diferente do serviço.
         Aluno suspeito = new Aluno("Média Absurda", "2026003", 50);
@@ -60,8 +62,14 @@ public class Main {
             // }
         // }
 
-        // --- UPDATE (ainda não implementado) ---
+        // --- UPDATE, DELETE E READ ---
         System.out.println();
+        alterar(servico, new Aluno ("Maria Silva", "2026001" , 9.0));
+        alterar(servico, new Aluno ("Maria Silva", "2126001" , 9.0));
+        excluir(servico, "2026001");
+        excluir(servico, "0000000");
+        consultar(servico, "2326001");
+        consultar(servico, "2026002");
         // try {
         //     dao.atualizar(new Aluno("Maria Silva", "2026001", 9.0));
         // } catch (UnsupportedOperationException e) {
@@ -80,6 +88,30 @@ public class Main {
             System.out.println("Cadastrado: " + aluno);
         } catch (IllegalArgumentException | IllegalStateException e) {
             System.out.println("Não foi possível cadastrar: " + e.getMessage());
+        }
+    }
+    private static void excluir(ServicoAluno servico, String matricula) {
+        try {
+            servico.excluir(matricula);
+            System.out.println("Removido: " + matricula);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            System.out.println("Não foi possível excluir: " + e.getMessage());
+        }
+    }
+    private static void alterar(ServicoAluno servico, Aluno aluno) {
+        try {
+            servico.alterar(aluno);
+            System.out.println("Alterado: " + aluno);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            System.out.println("Não foi possível alterar: " + e.getMessage());
+        }
+    }
+    private static void consultar(ServicoAluno servico, String matricula) {
+        try {
+            Aluno a = servico.consultar(matricula);
+            System.out.println("Encontrado: " + a);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            System.out.println("Não foi possível consultar: " + e.getMessage());
         }
     }
 }
